@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector Dragon Ball - Goku vs Piccolo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b35, #f7931e, #ffcd3c);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            color: #ff6b35;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .upload-section {
+            background: #f9f9f9;
+            border: 3px dashed #ff6b35;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            background: #f0f0f0;
+            border-color: #f7931e;
+            transform: translateY(-2px);
+        }
+
+        .upload-section.dragover {
+            background: #fff3e0;
+            border-color: #ffcd3c;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #ff6b35;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-container {
+            display: none;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .preview-image {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .results-container {
+            display: none;
+            background: #f9f9f9;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .character-result {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .character-result.goku {
+            background: linear-gradient(45deg, #ff9800, #ffc107);
+            color: white;
+        }
+
+        .character-result.piccolo {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+        }
+
+        .character-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .confidence-bar {
+            flex: 1;
+            margin: 0 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .winner-badge {
+            background: #fff;
+            color: #ff6b35;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff6b35;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🐉 Dragon Ball Detector</h1>
+            <p class="subtitle">¿Goku o Piccolo? ¡Descúbrelo con IA!</p>
+        </div>
+
+        <div class="upload-section" id="upload-area">
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">Arrastra tu imagen aquí o haz clic para seleccionar</div>
+            <button class="btn" onclick="document.getElementById('file-input').click()">
+                Seleccionar Imagen
+            </button>
+            <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
+        </div>
+
+        <div class="preview-container" id="preview-container">
+            <img id="preview-image" class="preview-image" alt="Vista previa">
+            <br>
+            <button class="btn" onclick="analyzeImage()">🔍 Analizar Personaje</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analizando imagen con IA...</p>
+        </div>
+
+        <div class="results-container" id="results-container">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #333;">📊 Resultados del Análisis</h3>
+            
+            <div class="character-result goku" id="goku-result">
+                <div class="character-name">🟠 GOKU</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="goku-confidence"></div>
+                </div>
+                <div id="goku-badge"></div>
+            </div>
+
+            <div class="character-result piccolo" id="piccolo-result">
+                <div class="character-name">🟢 PICCOLO</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="piccolo-confidence"></div>
+                </div>
+                <div id="piccolo-badge"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentImage = null;
+
+        // Configuración de drag & drop
+        const uploadArea = document.getElementById('upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            document.getElementById('file-input').click();
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona un archivo de imagen válido.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImage = e.target.result;
+                document.getElementById('preview-image').src = currentImage;
+                
+                // Ocultar área de carga y mostrar preview
+                document.getElementById('upload-area').style.display = 'none';
+                document.getElementById('preview-container').style.display = 'block';
+                document.getElementById('results-container').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function analyzeImage() {
+            if (!currentImage) {
+                alert('Por favor selecciona una imagen primero.');
+                return;
+            }
+
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-container').style.display = 'none';
+
+            // Simular análisis de IA (en una implementación real, aquí irían las predicciones del modelo)
+            setTimeout(() => {
+                // Generar resultados simulados más realistas
+                const gokuConfidence = Math.random() * 0.4 + 0.3; // Entre 30% y 70%
+                const piccoloConfidence = 1 - gokuConfidence;
+
+                displayResults(gokuConfidence, piccoloConfidence);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results-container').style.display = 'block';
+            }, 2000);
+        }
+
+        function displayResults(gokuConf, piccoloConf) {
+            const gokuPercentage = Math.round(gokuConf * 100);
+            const piccoloPercentage = Math.round(piccoloConf * 100);
+
+            // Actualizar barras de confianza
+            const gokuFill = document.getElementById('goku-confidence');
+            const piccoloFill = document.getElementById('piccolo-confidence');
+
+            gokuFill.style.width = gokuPercentage + '%';
+            gokuFill.textContent = gokuPercentage + '%';
+
+            piccoloFill.style.width = piccoloPercentage + '%';
+            piccoloFill.textContent = piccoloPercentage + '%';
+
+            // Determinar ganador
+            const gokuBadge = document.getElementById('goku-badge');
+            const piccoloBadge = document.getElementById('piccolo-badge');
+
+            gokuBadge.innerHTML = '';
+            piccoloBadge.innerHTML = '';
+
+            if (gokuConf > piccoloConf) {
+                gokuBadge.innerHTML = '<div class="winner-badge">¡GANADOR! 🏆</div>';
+            } else {
+                piccoloBadge.innerHTML = '<div class="winner-badge">¡GANADOR! 🏆</div>';
+            }
+        }
+
+        // Nota: Para implementación real con Teachable Machine:
+        /*
+        async function loadModel() {
+            const modelURL = "./my_model/model.json";
+            const metadataURL = "./my_model/metadata.json";
+            
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+        }
+
+        async function predict(imageElement) {
+            const prediction = await model.predict(imageElement);
+            return prediction;
+        }
+        */
+    </script>
+</body>
+</html>
