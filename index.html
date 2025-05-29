@@ -203,6 +203,13 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -223,8 +230,10 @@
 
         <div class="preview-container" id="preview-container">
             <img id="preview-image" class="preview-image" alt="Vista previa">
-            <br>
-            <button class="btn" onclick="analyzeImage()">🔍 Analizar Personaje</button>
+            <div class="button-row">
+                <button class="btn" onclick="analyzeImage()">🔍 Analizar Personaje</button>
+                <button class="btn" onclick="resetApp()">🔄 Cargar otra imagen</button>
+            </div>
         </div>
 
         <div class="loading" id="loading">
@@ -258,7 +267,8 @@
 
         // Configuración de drag & drop
         const uploadArea = document.getElementById('upload-area');
-        
+        const fileInput = document.getElementById('file-input');
+
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
@@ -277,15 +287,13 @@
             }
         });
 
-        uploadArea.addEventListener('click', () => {
-            document.getElementById('file-input').click();
-        });
-
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
                 handleFile(file);
             }
+            // Limpia el valor para permitir seleccionar la misma imagen dos veces seguidas
+            event.target.value = '';
         }
 
         function handleFile(file) {
@@ -356,6 +364,17 @@
             } else {
                 piccoloBadge.innerHTML = '<div class="winner-badge">¡GANADOR! 🏆</div>';
             }
+        }
+
+        function resetApp() {
+            currentImage = null;
+            document.getElementById('preview-image').src = '';
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('results-container').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('upload-area').style.display = 'block';
+            // Limpia el input de archivo
+            fileInput.value = '';
         }
 
         // Nota: Para implementación real con Teachable Machine:
